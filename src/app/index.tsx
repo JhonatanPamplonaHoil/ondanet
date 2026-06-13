@@ -1,98 +1,85 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Animated, TouchableOpacity, StatusBar } from 'react-native';
+import { useRouter } from 'expo-router';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function WelcomeScreen() {
+  const router = useRouter();
+  
+  // Valor inicial de la opacidad en 0 (totalmente invisible)
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  useEffect(() => {
+    // Animación: Cambia la opacidad a 1 en 1.5 segundos
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0052CC" />
+      
+      {/* Contenedor Animado para el Nombre de la Empresa */}
+      <Animated.View style={[styles.logoContainer, { opacity: fadeAnim }]}>
+        <Text style={styles.brandText}>OndaNet</Text>
+        <Text style={styles.sloganText}>Innovación y Conectividad Sin Límites</Text>
+      </Animated.View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {/* Botón Ingresar */}
+      <TouchableOpacity 
+        style={styles.button} 
+        activeOpacity={0.8}
+        // Usamos 'as any' para evitar que TypeScript marque error en rojo
+        onPress={() => router.replace('/menu' as any)} 
+      >
+        <Text style={styles.buttonText}>INGRESAR</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+    backgroundColor: '#0052CC', // Azul corporativo OndaNet
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    paddingVertical: 80,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  logoContainer: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  title: {
-    textAlign: 'center',
+  brandText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    letterSpacing: 2,
   },
-  code: {
-    textTransform: 'uppercase',
+  sloganText: {
+    fontSize: 16,
+    color: '#E6F4FE',
+    marginTop: 10,
+    fontWeight: '300',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  button: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 6, // Sombra para dispositivos Android
+  },
+  buttonText: {
+    color: '#0052CC',
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 1.5,
   },
 });
